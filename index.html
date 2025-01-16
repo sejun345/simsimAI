@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Redirect</title>
+    <script>
+        window.onload = function() {
+            // 브라우저 언어를 확인
+            const userLang = navigator.language || navigator.userLanguage;
+
+            // 언어가 영어(en)로 시작하면 en_index.html로 리다이렉트
+            if (userLang.startsWith('en')) {
+                window.location.href = 'en_index.html';
+            }
+            // 언어가 한국어(ko)로 시작하면 ko_index.html로 리다이렉트
+            else if (userLang.startsWith('ko')) {
+                window.location.href = 'ko_index.html';
+            }
+            // 그 외의 언어는 기본적으로 영어 페이지로 리다이렉트
+            else {
+                window.location.href = 'en_index.html';
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>redirect index.html to en_index.html
+    <h1>혹시 이 웹 페이지에서 넘어가지 않는다면 위 링크의 index.html 부분을 ko_index.html로 수정하세요</h1>
+    <p>Redirecting based on your language preferences...</p>
+    <p>당신의 언어로 웹페이지가 마법처럼 리다이렉트 중입니다</p>
+    <h1>Windows 인터넷 해결사 실행</h1>
+    <button id="run-troubleshooter">실행하기</button>
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        document.getElementById('run-troubleshooter').addEventListener('click', () => {
+            ipcRenderer.send('run-troubleshooter');
+        });
+    </script>
+    
+</body>
+</html>

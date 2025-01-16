@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko-kr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>심심이 빰치는 AI 0.9(BETA)</title>
+
+    <!-- KCC 간판체 폰트 설정 -->
+    <style>
+        @font-face {
+            font-family: 'KCC-Ganpan';
+            src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.0/KCC-Ganpan.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'KCC-Ganpan', sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-family: 'KCC-Ganpan', sans-serif;
+            font-size: 5vw;
+            text-align: center;
+            color: #333;
+            position: absolute;
+            top: 3%;
+            left: 50%;
+            transform: translateX(-50%);
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        #beta {
+            font-size: 12px;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #888;
+            letter-spacing: 1px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            height: 60%;
+            overflow-y: auto;
+            padding: 20px;
+            margin-top: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: absolute;
+            top: 30%;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid #ddd;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 1.5rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            box-sizing: border-box;
+            font-family: 'KCC-Ganpan', sans-serif;
+            transition: border 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: #4CAF50;
+        }
+
+        .user-message, .ai-message {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            max-width: 60%;
+            word-wrap: break-word;
+            display: inline-block;
+            font-family: 'KCC-Ganpan', sans-serif;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .user-message {
+            background-color: #a2d2ff;
+            align-self: flex-end;
+            color: #333;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .ai-message {
+            background-color: #f0f0f0;
+            align-self: flex-start;
+            color: #555;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 7vw;
+            }
+
+            .user-message, .ai-message {
+                font-size: 1rem;
+            }
+
+            input[type="text"] {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 id="title">심심이 빰치는 AI</h1>
+    <div id="beta">0.9 (BETA)</div>
+    <div class="chat-container" id="chat-container"></div>
+    <input type="text" id="user-input" placeholder="텍스트를 입력하세요..." onkeydown="handleInput(event)">
+
+    <script>
+        const responses = {
+            "자기소개": "저는 심심이 빰치는 AI입니다. 베타버전이라 오류가 많을 수 있습니다!",
+            "안녕": "안녕하세요! 무엇을 도와드릴까요?",
+            "날씨": "날씨는 모르지만, 항상 기분 좋은 날을 만들어드릴 수 있어요!",
+            "개발": '이 test용 ai는 <a href="http://github.com/sejun345">se_U</a>이가 기여했습니다!',
+            "오늘": "오늘은 뭐가 하고 싶으세요?",
+            "영화": "영화 추천을 원하시나요? 어떤 장르 좋아하시나요?",
+            "음악": "좋아하는 음악 장르가 무엇인가요?",
+            "책": "최근에 읽은 책은 무엇인가요?",
+            "기분": "기분이 어떤가요? 기분이 좋으면 좋겠네요!",
+            "하늘": "하늘은 언제나 멋져요! 날씨가 좋으면 하늘을 바라보는 것도 좋은 선택이에요.",
+            "꿈": "최근에 어떤 꿈을 꾸셨나요?",
+            "시간": "시간이 빨리 지나가는 것 같아요. 무엇을 하고 계세요?",
+            "어디": "어디에 가고 싶으세요?",
+            "집": "집이 편안하죠! 집에서 할 수 있는 활동이 많아요.",
+            "날짜": "오늘은 멋진 날입니다! 무엇을 계획하고 계세요?",
+            "주말": "주말에는 무엇을 하세요? 휴식이 필요할 때죠!",
+            "여행": "어디로 여행 가고 싶으세요?",
+            "게임": "게임을 좋아하시나요? 어떤 게임을 즐기세요?",
+            "운동": "운동을 좋아하시나요? 어떤 운동을 즐기세요?",
+            "요리": "무엇을 요리하는 것을 좋아하시나요?",
+            "책추천": "책을 좋아하시나요? 최근에 어떤 책을 읽었나요?",
+            "사랑": "사랑은 아름다운 감정이에요. 사랑에 관한 생각을 나누고 싶으신가요?",
+            "친구": "친구와 함께 시간을 보내는 것이 중요하죠! 친구는 어떤 사람인가요?",
+            "직업": "무슨 직업을 가지고 계세요? 아니면 하고 싶은 직업이 있나요?",
+            "음식": "좋아하는 음식이 무엇인가요? 저는 다양한 음식을 좋아해요!",
+            "추억": "어떤 추억이 가장 기억에 남나요?",
+            "고향": "고향에 대해 이야기 해볼까요? 고향에 대한 추억이 있으신가요?",
+            "도움": "어떤 도움을 드릴까요? 궁금한 것이 있다면 언제든지 물어보세요!",
+            "세상": "세상에 대한 다양한 이야기들이 많아요. 어떤 주제를 다뤄볼까요?",
+            "세기": "세기마다 중요한 사건들이 있었죠. 어떤 세기의 이야기를 나누고 싶으세요?",
+            "뉴스": "최근 뉴스에 대해 관심이 있으신가요?",
+            "기술": "기술에 대한 이야기를 좋아하시나요? 어떤 분야의 기술에 관심이 많으세요?",
+            "로봇": "로봇에 대해 이야기 해볼까요? 로봇 기술이 발전하고 있죠!",
+            "우주": "우주는 무궁무진한 신비로 가득해요. 우주에 대해 궁금한 것이 있나요?",
+            "AI": "AI는 정말 흥미로운 분야에요. AI에 대한 관심이 많으신가요?",
+            "마음": "마음은 정말 중요한 것 같아요. 마음이 편안해야 다른 것들도 잘 할 수 있죠.",
+            "행복": "행복한 기분을 느끼고 있군요! 기분 좋으시겠어요!",
+            "슬픔": "슬픈 기분이 드시나요? 힘내세요, 괜찮을 거예요.",
+            "화남": "화가 나신 건가요? 어떤 일이 있었나요?",
+            "기쁨": "기쁨을 느끼고 계시네요! 기분 좋게 하루 보내세요!",
+            "우울": "우울한 기분이 드시나요? 조금 더 밝은 마음이 될 수 있도록 도와드릴게요.",
+            "지루함": "지루하신가요? 그럴 때는 새로운 취미를 찾는 것도 좋아요!",
+            "걱정": "걱정이 많으신가요? 그럴 때는 잠시 휴식을 취해보세요.",
+            "불안": "불안한 기분이 드시나요? 가벼운 운동이나 마음을 안정시키는 활동을 해보세요.",
+            "피곤": "피곤한 기분인가요? 잠시 쉬면서 에너지를 회복하세요.",
+            "긴장": "긴장된 기분인가요? 깊은 숨을 쉬면서 긴장을 풀어보세요.",
+            "당황": "당황스러운 일이 있었나요? 차분히 해결할 수 있을 거예요.",
+            "불쾌": "불쾌한 일이 있었나요? 그럴 때는 잠시 생각을 정리해보는 것도 좋습니다.",
+            "흥미": "흥미를 느끼는 것 같네요! 어떤 일이 궁금한가요?",
+            "자신감": "자신감을 느끼고 있군요! 멋지세요!",
+            "불행": "불행한 기분이 드시나요? 이런 때는 자신을 사랑하는 것이 중요해요.",
+            "감사": "감사한 마음을 느끼시네요! 감사의 마음은 삶을 더욱 풍요롭게 만듭니다.",
+            "행운": "행운이 가득하길 바랍니다! 오늘 하루도 행운이 가득하길 기원할게요."
+        };
+
+        function handleInput(event) {
+            if (event.key === "Enter") {
+                const inputField = document.getElementById('user-input');
+                const userInput = inputField.value.trim();
+
+                if (userInput) {
+                    addMessage(userInput, "user-message");
+                    generateResponse(userInput);
+                    inputField.value = "";
+                }
+            }
+        }
+
+        function generateResponse(input) {
+            // 특수문자(예: 물음표) 제거하기
+            const cleanedInput = input.replace(/[?]/g, "").trim();
+            const response = responses[cleanedInput] || "잘 모르겠어요. 다른 질문을 해보세요.";
+            setTimeout(() => addMessage(response, "ai-message"), 1000);
+        }
+
+        function addMessage(message, type) {
+            const chatContainer = document.getElementById('chat-container');
+            const newMessage = document.createElement('div');
+            newMessage.classList.add(type);
+            newMessage.innerHTML = message;
+            chatContainer.appendChild(newMessage);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>

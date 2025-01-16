@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design is a throwaway AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f4f8;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 80vh;
+            overflow-y: auto;
+            padding: 10px;
+            box-sizing: border-box;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+        .user-message, .ai-message {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            max-width: 60%;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background-color: #a2d2ff;
+            align-self: flex-end;
+        }
+        .ai-message {
+            background-color: #f0f0f0;
+            align-self: flex-start;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: calc(100% - 22px);
+            box-sizing: border-box;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bored AI 0.9 (BETA)</h1>
+    <div class="chat-container" id="chat-container">
+        <!-- User and AI messages will appear here -->
+    </div>
+    <input type="text" id="user-input" placeholder="Enter text..." onkeydown="handleInput(event)">
+    
+    <script>
+        function handleInput(event) {
+            if (event.key === 'Enter') {
+                const userInput = document.getElementById('user-input').value.trim();
+                
+                if (userInput !== "") {
+                    // Clean the input (remove spaces and make lowercase)
+                    const cleanedInput = userInput.replace(/\s+/g, '').toLowerCase();
+                    
+                    addMessage(userInput, "user");
+
+                    // AI Response Processing
+                    let aiResponse = '';
+                    if (cleanedInput.includes('introduce yourself')) {
+                        aiResponse = "I am Bored AI, version 0.9. I'm in beta, so I might have some bugs!";
+                    } else if (cleanedInput.includes('hello')) {
+                        aiResponse = "Hello! How can I assist you today?";
+                    } else if (cleanedInput.includes('weather')) {
+                        aiResponse = "I don't know the weather, but I can always create a pleasant atmosphere for you!";
+                    } else if (cleanedInput.includes('development')) {
+                        aiResponse = 'This test AI was developed by <a href="http://github.com/sejun345">se_U</a> and chat GPT!';
+                    } else if (cleanedInput.includes('today')) {
+                        aiResponse = "What would you like to do today?";
+                    } else if (cleanedInput.includes('movie')) {
+                        aiResponse = "Do you want a movie recommendation? What genre do you like?";
+                    } else if (cleanedInput.includes('music')) {
+                        aiResponse = "What music genre do you prefer?";
+                    } else if (cleanedInput.includes('book')) {
+                        aiResponse = "What book have you read recently?";
+                    } else if (cleanedInput.includes('mood')) {
+                        aiResponse = "How are you feeling? I hope you're feeling great!";
+                    }
+                    // Emotional Expressions (60 cases)
+                    else if (cleanedInput.includes('happy')) {
+                        aiResponse = "You're feeling happy! That must be a great feeling!";
+                    } else if (cleanedInput.includes('sad')) {
+                        aiResponse = "Feeling sad? Don't worry, everything will be okay.";
+                    } else if (cleanedInput.includes('angry')) {
+                        aiResponse = "Are you angry? What happened?";
+                    } else if (cleanedInput.includes('joy')) {
+                        aiResponse = "You're experiencing joy! Have a great day!";
+                    } else {
+                        aiResponse = "I'm still learning.";
+                    }
+
+                    addMessage(aiResponse, "ai");
+                    document.getElementById('user-input').value = '';
+                }
+            }
+        }
+
+        function addMessage(message, type) {
+            const chatContainer = document.getElementById('chat-container');
+            const messageElement = document.createElement('div');
+            messageElement.classList.add(type === 'user' ? 'user-message' : 'ai-message');
+            messageElement.innerHTML = message;  // Use innerHTML to render the <a> tag
+            chatContainer.appendChild(messageElement);
+            chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to bottom
+        }
+    </script>
+</body>
+</html>
